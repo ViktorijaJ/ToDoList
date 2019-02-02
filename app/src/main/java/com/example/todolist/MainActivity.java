@@ -8,31 +8,30 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.example.todolist.model.ItemService;
+import com.example.todolist.model.DBService;
+import com.example.todolist.view.ItemAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     // Model
-    private ItemService itemService;
+    private DBService dbService;
 
     //Controller
-    private ListAdapter listAdapter;
+    private ItemAdapter itemAdapter;
 
     // View
     private ListView itemListView;
 
     public void updateView() {
-
-        if (listAdapter == null) {
-            listAdapter = new ListAdapter(this, itemService.getAllItems(), itemService);
-            itemListView.setAdapter(listAdapter);
+        if (itemAdapter == null) {
+            itemAdapter = new ItemAdapter(this, dbService.getAllItems(), dbService);
+            itemListView.setAdapter(itemAdapter);
         } else {
-            listAdapter.clear();
-            listAdapter.addAll(itemService.getAllItems());
-            listAdapter.notifyDataSetChanged();
+            itemAdapter.clear();
+            itemAdapter.addAll(dbService.getAllItems());
+            itemAdapter.notifyDataSetChanged();
         }
 
     }
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String task = String.valueOf(taskEditText.getText());
-                        itemService.post(task);
+                        dbService.post(task);
                         updateView();
                     }
                 })
@@ -66,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        itemService = new ItemService(this);
+        dbService = new DBService(this);
 
         itemListView = (ListView) findViewById(R.id.listView);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

@@ -10,26 +10,23 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 
-import com.example.demotodo.MainActivity;
-import com.example.demotodo.R;
-import com.example.demotodo.model.ItemVO;
 import com.example.todolist.MainActivity;
 import com.example.todolist.R;
-import com.example.todolist.model.ItemService;
+import com.example.todolist.model.DBService;
 import com.example.todolist.model.ItemVO;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class ListAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
+public class ItemAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
 
     // Model
-    private ItemService itemService;
+    private DBService DBService;
 
-    public ListAdapter(Context context, ArrayList<ItemVO> items, ItemService itemService) {
+    public ItemAdapter(Context context, ArrayList<ItemVO> items, DBService DBService) {
         super(context, 0, items);
-        this.itemService = itemService;
+        this.DBService = DBService;
     }
+
 
     @Override
     public void onClick(View view) {
@@ -38,7 +35,7 @@ public class ListAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.
         int position = listView.getPositionForView(parentRow);
 
         ItemVO itemVO = getItem(position);
-        itemService.delete(itemVO);
+        DBService.delete(itemVO);
         ((MainActivity) getContext()).updateView();
     }
 
@@ -60,7 +57,7 @@ public class ListAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.
         } else {
             itemVO.done = 0;
         }
-        itemService.put(itemVO);
+        DBService.put(itemVO);
 
         ((MainActivity) getContext()).updateView();
     }
@@ -86,7 +83,4 @@ public class ListAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.
 
         return convertView;
     }
-}
-
-
 }
