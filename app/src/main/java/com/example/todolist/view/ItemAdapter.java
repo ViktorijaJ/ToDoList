@@ -7,59 +7,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ListView;
 
 import com.example.todolist.MainActivity;
 import com.example.todolist.R;
-import com.example.todolist.model.DBService;
 import com.example.todolist.model.ItemVO;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class ItemAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
-
-    // Model
-    private DBService DBService;
-
-    public ItemAdapter(Context context, ArrayList<ItemVO> items, DBService DBService) {
-        super(context, 0, items);
-        this.DBService = DBService;
-    }
+public class ItemAdapter extends ArrayAdapter<ItemVO> {
 
 
-    @Override
-    public void onClick(View view) {
-        View parentRow = (View) view.getParent();
-        ListView listView = (ListView) parentRow.getParent();
-        int position = listView.getPositionForView(parentRow);
-
-        ItemVO itemVO = getItem(position);
-        DBService.delete(itemVO);
-        ((MainActivity) getContext()).updateView();
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton view, boolean isChecked) {
-        View parentRow = (View) view.getParent();
-        ListView listView = (ListView) parentRow.getParent();
-
-        if (listView == null) {
-            return;
-        }
-
-        int position = listView.getPositionForView(parentRow);
-
-        ItemVO itemVO = getItem(position);
-
-        if (isChecked == true) {
-            itemVO.done = 1;
-        } else {
-            itemVO.done = 0;
-        }
-        DBService.put(itemVO);
-
-        ((MainActivity) getContext()).updateView();
+    public ItemAdapter(Context context, List<ItemVO> list) {
+        super(context, 0, list);
     }
 
     @Override
@@ -71,15 +30,17 @@ public class ItemAdapter extends ArrayAdapter<ItemVO> implements CompoundButton.
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_layout, parent, false);
         }
 
-        CheckBox itemCheckbox = (CheckBox) convertView.findViewById(R.id.checkbox);
 
-        itemCheckbox.setText(item.title);
-        itemCheckbox.setChecked(item.done == 1);
-
-        itemCheckbox.setOnCheckedChangeListener(this);
-
+        CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkbox);
         Button deleteButton = (Button) convertView.findViewById(R.id.deleteBtn);
-        deleteButton.setOnClickListener(this);
+
+        MainActivity activity = (MainActivity) getContext();
+
+        checkBox.setOnClickListener(activity);
+        deleteButton.setOnClickListener(activity);
+
+        checkBox.setText(item.title);
+        checkBox.setChecked(item.isdone);
 
         return convertView;
     }

@@ -8,18 +8,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.security.auth.callback.Callback;
 
 
-public class DBService extends SQLiteOpenHelper implements DataCrud, Callback<List<ItemVO>> {
+public class DBService extends SQLiteOpenHelper implements DataCrud {
 
-    public static final String DB_NAME = "lt.demo.todo.db";
+    public static final String DB_NAME = "lt.todo2.db";
     public static final int DB_VERSION = 1;
+    private com.example.todolist.model.ICallBackInterface callback;
 
-    public DBService(Context context) {
+    public DBService(Context context, com.example.todolist.model.ICallBackInterface callback) {
         super(context, DB_NAME, null, DB_VERSION);
+        this.callback = callback;
     }
 
     @Override
@@ -38,7 +37,7 @@ public class DBService extends SQLiteOpenHelper implements DataCrud, Callback<Li
         onCreate(db);
     }
 
-    public void get(){
+    public void get() {
         ArrayList<ItemVO> taskList = new ArrayList<ItemVO>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(
@@ -61,48 +60,51 @@ public class DBService extends SQLiteOpenHelper implements DataCrud, Callback<Li
             int titleIndex = cursor.getColumnIndex(TasksTable.COL_TASK_TITLE);
 
             ItemVO itemVO = new ItemVO();
-            itemVO.id = cursor.getInt(idIndex);
-            itemVO.done = cursor.getInt(doneIndex);
-            itemVO.title = cursor.getString(titleIndex);
+            itemVO.setId(cursor.getLong(idIndex));
+            itemVO.setIsdone(cursor.getInt(doneIndex) != 0);
+            itemVO.setTitle(cursor.getString(titleIndex));
 
             taskList.add(itemVO);
         }
         cursor.close();
         db.close();
-//        return taskList;
+        callback.onSuccess(taskList);
     }
 
 
-    public void post(String task) {
+    public void post(ItemVO task) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(TasksTable.COL_TASK_TITLE, task);
+        values.put(TasksTable.COL_TASK_TITLE, task.title);
         db.insertWithOnConflict(TasksTable.TABLE,
                 null,
                 values,
                 SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
+        get();
     }
 
     public void delete(ItemVO itemVO) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TasksTable.TABLE,
                 TasksTable._ID + " = ?",
-                new String[]{Integer.toString(itemVO.id)});
+                new String[]{Long.toString(itemVO.getId())});
         db.close();
+        get();
     }
 
     public void put(ItemVO itemVO) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(TasksTable.COL_TASK_DONE, itemVO.done);
+        contentValues.put(TasksTable.COL_TASK_DONE, itemVO.isdone);
         SQLiteDatabase db = this.getWritableDatabase();
         db.updateWithOnConflict(TasksTable.TABLE,
                 contentValues,
                 TasksTable._ID + " = ?",
-                new String[]{Integer.toString(itemVO.id)},
+                new String[]{Long.toString(itemVO.getId())},
                 SQLiteDatabase.CONFLICT_REPLACE
         );
         db.close();
+        get();
     }
 
 

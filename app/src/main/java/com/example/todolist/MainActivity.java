@@ -6,34 +6,48 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import com.example.todolist.model.DBService;
+import com.example.todolist.model.DataCrud;
+import com.example.todolist.model.ItemVO;
 import com.example.todolist.view.ItemAdapter;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import java.util.List;
 
-    // Model
-    private DBService dbService;
+public class MainActivity extends AppCompatActivity implements com.example.todolist.model.ICallBackInterface, View.OnClickListener {
 
-    //Controller
+    private DataCrud dataCrud;
     private ItemAdapter itemAdapter;
 
-    // View
-    private ListView itemListView;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    public void updateView() {
-        if (itemAdapter == null) {
-            itemAdapter = new ItemAdapter(this, dbService.getAllItems(), dbService);
-            itemListView.setAdapter(itemAdapter);
-        } else {
-            itemAdapter.clear();
-            itemAdapter.addAll(dbService.getAllItems());
-            itemAdapter.notifyDataSetChanged();
-        }
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDialog();
+            }
+        });
 
+        dataCrud = new DBService(this, this);
+        dataCrud.get();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     public void showDialog() {
@@ -46,8 +60,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String task = String.valueOf(taskEditText.getText());
-                        dbService.post(task);
-                        updateView();
+                        ItemVO itemVO = new ItemVO();
+                        itemVO.title = task;
+                        itemVO.setIsdone(false);
+                        dataCrud.post(itemVO);
                     }
                 })
                 .setNegativeButton("Atšaukti", null)
@@ -56,24 +72,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View view) {
-        showDialog();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_main);
-        dbService = new DBService(this);
-
-        itemListView = (ListView) findViewById(R.id.listView);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(this);
-        updateView();
+    public void onSuccess(List<ItemVO> list) {
+        itemAdapter = new ItemAdapter(this, list);
+        ListView listView = (ListView) this.findViewById(R.id.listView);
+        listView.setAdapter(itemAdapter);
     }
 
+    @Override
+    public void onClick(View v) {
+        ListView list = (ListView) v.getParent().getParent();
+
+        int position = list.getPositionForView(v);
+
+        ItemVO itemVO = itemAdapter.getItem(position);
+
+        switch (v.getId()) {
+            case R.id.deleteBtn:
+                dataCrud.delete(itemVO);
+                break;
+            case R.id.checkbox:
+                itemVO.setIsdone(!itemVO.isIsdone());
+                dataCrud.put(itemVO);
+                break;
+        }
+    }
 }
