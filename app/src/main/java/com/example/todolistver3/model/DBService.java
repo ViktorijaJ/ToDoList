@@ -1,4 +1,4 @@
-package com.example.todolist.model;
+package com.example.todolistver3.model;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,9 +14,9 @@ public class DBService extends SQLiteOpenHelper implements DataCrud {
 
     public static final String DB_NAME = "lt.todo2.db";
     public static final int DB_VERSION = 1;
-    private com.example.todolist.model.ICallBackInterface callback;
+    private com.example.todolistver3.model.ICallBackInterface callback;
 
-    public DBService(Context context, com.example.todolist.model.ICallBackInterface callback) {
+    public DBService(Context context, com.example.todolistver3.model.ICallBackInterface callback) {
         super(context, DB_NAME, null, DB_VERSION);
         this.callback = callback;
     }
