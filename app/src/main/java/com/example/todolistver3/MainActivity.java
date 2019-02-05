@@ -1,4 +1,4 @@
-package com.example.todolist;
+package com.example.todolistver3;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -7,29 +7,38 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
-import com.example.todolist.model.DBService;
-import com.example.todolist.model.DataCrud;
-import com.example.todolist.model.ItemVO;
-import com.example.todolist.view.ItemAdapter;
+import com.example.todolistver3.model.DBService;
+import com.example.todolistver3.model.DataCrud;
+import com.example.todolistver3.model.FileService;
+import com.example.todolistver3.model.ItemVO;
+import com.example.todolistver3.view.ItemAdapter;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements com.example.todolist.model.ICallBackInterface, View.OnClickListener {
+import static com.example.todolistver3.model.FileService.FILE_NAME;
+
+public class MainActivity extends AppCompatActivity implements com.example.todolistver3.model.ICallBackInterface, View.OnClickListener {
 
     private DataCrud dataCrud;
     private ItemAdapter itemAdapter;
+    private String sub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setSubtitle("Using phone storage to save data");
+
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -39,24 +48,19 @@ public class MainActivity extends AppCompatActivity implements com.example.todol
             }
         });
 
+        //by default app uses phone's storage to save data
         dataCrud = new DBService(this, this);
         dataCrud.get();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
 
     public void showDialog() {
         final EditText taskEditText = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Pridėti naują įrašą")
-                .setMessage("Ką norite dar nuveikti?")
+                .setTitle("Add something new")
+                .setMessage("What do you want to do??")
                 .setView(taskEditText)
-                .setPositiveButton("Pridėti", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String task = String.valueOf(taskEditText.getText());
@@ -66,23 +70,39 @@ public class MainActivity extends AppCompatActivity implements com.example.todol
                         dataCrud.post(itemVO);
                     }
                 })
-                .setNegativeButton("Atšaukti", null)
+                .setNegativeButton("Cancel", null)
                 .create();
         dialog.show();
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Get menu inflater.
+        MenuInflater menuInflater = getMenuInflater();
+        // Inflate the menu with menu items.
+        menuInflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /* Triggered when use click menu item. */
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        item.setChecked(true);
+        // Get menu item id.
+        int itemId = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (itemId == R.id.db) {
+            dataCrud = new DBService(this, this);
+            sub = "Using phone storage to save data";
+            Toast.makeText(this, "Phone memory is set", Toast.LENGTH_LONG).show();
+        } else if (itemId == R.id.file) {
+            dataCrud = new FileService(this, this);
+            sub = "Using file " + FILE_NAME + " to save data";
+            Toast.makeText(this, "File memory is set", Toast.LENGTH_LONG).show();
         }
-
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setSubtitle(sub);
+        dataCrud.get();
         return super.onOptionsItemSelected(item);
     }
 

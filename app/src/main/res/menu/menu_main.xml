@@ -1,10 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.todolist.MainActivity">
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+    tools:context="com.example.todolistver3.MainActivity">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/db"
+            android:orderInCategory="1"
+            android:title="Use phone memory to save data"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/file"
+            android:orderInCategory="2"
+            android:title="Use file to save data"
+            app:showAsAction="never" />
+    </group>
 </menu>

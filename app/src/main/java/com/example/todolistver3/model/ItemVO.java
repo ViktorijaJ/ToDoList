@@ -1,4 +1,4 @@
-package com.example.todolist.model;
+package com.example.todolistver3.model;
 
 public class ItemVO {
     public Long id;

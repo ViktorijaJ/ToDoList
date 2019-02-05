@@ -1,4 +1,4 @@
-package com.example.todolist.model;
+package com.example.todolistver3.model;
 
 public interface DataCrud {
     void get();

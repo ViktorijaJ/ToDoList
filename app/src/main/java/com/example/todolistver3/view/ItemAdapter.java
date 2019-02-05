@@ -1,4 +1,4 @@
-package com.example.todolist.view;
+package com.example.todolistver3.view;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,9 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 
-import com.example.todolist.MainActivity;
-import com.example.todolist.R;
-import com.example.todolist.model.ItemVO;
+import com.example.todolistver3.MainActivity;
+import com.example.todolistver3.R;
+import com.example.todolistver3.model.ItemVO;
 
 import java.util.List;
 
